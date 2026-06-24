@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtmosphereX | Next-Gen Weather Intelligence</title>
+  <meta name="description" content="A real-time, highly interactive weather intelligence dashboard powered by Open-Meteo REST APIs. Built with glassmorphic aesthetics and custom data visualizations.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1" id="glow1"></div>
+  <div class="ambient-glow glow-2" id="glow2"></div>
+
+  <div class="dashboard-container">
+    <!-- Header Area -->
+    <header class="dashboard-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z" class="sun-core"></path>
+          </svg>
+        </div>
+        <h1>Atmosphere<span class="gradient-text">X</span></h1>
+      </div>
+
+      <!-- Search Section -->
+      <div class="search-wrapper">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="city-search" placeholder="Search for cities..." autocomplete="off">
+          <button id="geo-btn" title="Use current location">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <!-- Autocomplete Suggestions -->
+        <div class="suggestions-box" id="suggestions"></div>
+      </div>
+
+      <!-- Settings & Toggles -->
+      <div class="settings-panel">
+        <div class="unit-toggle-container">
+          <span class="unit-label active" id="unit-c">°C</span>
+          <label class="switch">
+            <input type="checkbox" id="unit-toggle-checkbox">
+            <span class="slider round"></span>
+          </label>
+          <span class="unit-label" id="unit-f">°F</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Search Pills -->
+    <div class="quick-pills">
+      <button class="pill-btn" data-city="London">London</button>
+      <button class="pill-btn" data-city="New York">New York</button>
+      <button class="pill-btn" data-city="Tokyo">Tokyo</button>
+      <button class="pill-btn" data-city="Paris">Paris</button>
+      <button class="pill-btn" data-city="Mumbai">Mumbai</button>
+      <button class="pill-btn" data-city="Sydney">Sydney</button>
+    </div>
+
+    <!-- Main Grid Content -->
+    <main class="dashboard-main">
+      <!-- Error Banner -->
+      <div class="error-container hidden" id="error-banner">
+        <div class="error-card">
+          <div class="error-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div class="error-details">
+            <h3>Something went wrong</h3>
+            <p id="error-message">Could not fetch weather data. Please try again.</p>
+          </div>
+          <button class="retry-btn" id="error-retry">Retry</button>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div class="content-grid" id="main-content">
+        <!-- LEFT COLUMN: Primary Card -->
+        <section class="left-column">
+          <!-- Current Weather Card -->
+          <div class="card current-weather-card" id="current-weather-card">
+            <!-- Dynamic Weather Effects Container -->
+            <div class="weather-effect-overlay" id="weather-effects"></div>
+            
+            <div class="card-glow"></div>
+            <div class="weather-meta">
+              <div class="location-info">
+                <h2 id="current-city">Loading City...</h2>
+                <p id="current-country">Country</p>
+              </div>
+              <div class="date-time">
+                <span id="current-date">-- --- ----</span>
+                <span id="current-time">--:-- --</span>
+              </div>
+            </div>
+
+            <div class="weather-display">
+              <div class="weather-icon-lg" id="current-weather-icon">
+                <!-- SVG Icon will be injected here -->
+              </div>
+              <div class="temp-display">
+                <span id="current-temp">--</span>
+                <span class="temp-unit">°C</span>
+              </div>
+            </div>
+
+            <div class="weather-summary">
+              <h3 id="weather-description">Loading...</h3>
+              <div class="temp-range">
+                <span>H: <strong id="current-temp-max">--°</strong></span>
+                <span class="separator">|</span>
+                <span>L: <strong id="current-temp-min">--°</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Detailed Metrics & Forecasts -->
+        <section class="right-column">
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <!-- Feels Like -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+                </svg>
+                <span>Feels Like</span>
+              </div>
+              <div class="metric-value" id="val-feels-like">--°C</div>
+              <div class="metric-sub" id="sub-feels-like">Thermal sensation</div>
+            </div>
+
+            <!-- Wind -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                </svg>
+                <span>Wind Speed</span>
+              </div>
+              <div class="metric-value">
+                <span id="val-wind">-- km/h</span>
+                <div class="wind-dir-arrow" id="wind-direction-indicator">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="metric-sub" id="sub-wind">Direction: --°</div>
+            </div>
+
+            <!-- Humidity -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+                <span>Humidity</span>
+              </div>
+              <div class="metric-value" id="val-humidity">--%</div>
+              <div class="metric-sub" id="sub-humidity">Moisture level</div>
+            </div>
+
+            <!-- UV Index -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <span>Weather UV</span>
+              </div>
+              <div class="metric-value" id="val-uv">--</div>
+              <div class="metric-sub" id="sub-uv">Solar radiation</div>
+            </div>
+
+            <!-- Pressure -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="6" x2="12" y2="12"></line>
+                  <line x1="12" y1="12" x2="16" y2="14"></line>
+                </svg>
+                <span>Pressure</span>
+              </div>
+              <div class="metric-value" id="val-pressure">-- hPa</div>
+              <div class="metric-sub" id="sub-pressure">Atmospheric pressure</div>
+            </div>
+
+            <!-- Cloud Cover -->
+            <div class="card metric-card">
+              <div class="metric-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                </svg>
+                <span>Cloud Cover</span>
+              </div>
+              <div class="metric-value" id="val-cloud">--%</div>
+              <div class="metric-sub" id="sub-cloud">Sky coverage</div>
+            </div>
+          </div>
+
+          <!-- Hourly Forecast Card with Custom SVG Chart -->
+          <div class="card forecast-hourly-card">
+            <h3>Hourly Forecast (24h)</h3>
+            <div class="chart-container">
+              <!-- Custom Interactive SVG Chart -->
+              <svg id="hourly-chart" viewBox="0 0 600 180" preserveAspectRatio="none">
+                <!-- SVG elements will be generated dynamically by app.js -->
+              </svg>
+              <div class="chart-timeline" id="chart-timeline">
+                <!-- Timeline labels will be injected here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 7-Day Forecast Card -->
+          <div class="card forecast-daily-card">
+            <h3>7-Day Forecast</h3>
+            <div class="daily-list" id="daily-forecast-list">
+              <!-- Dynamic Daily Cards go here -->
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SKELETON LOADERS (Hidden by default, shown during fetch) -->
+      <div class="content-grid hidden" id="skeleton-loader">
+        <section class="left-column">
+          <div class="card current-weather-card skeleton-pulse">
+            <div style="height: 40px; width: 60%; background: rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 12px;"></div>
+            <div style="height: 20px; width: 40%; background: rgba(255,255,255,0.06); border-radius: 6px; margin-bottom: 40px;"></div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+              <div style="height: 80px; width: 80px; background: rgba(255,255,255,0.06); border-radius: 50%;"></div>
+              <div style="height: 60px; width: 120px; background: rgba(255,255,255,0.06); border-radius: 8px;"></div>
+            </div>
+            <div style="height: 30px; width: 70%; background: rgba(255,255,255,0.06); border-radius: 8px;"></div>
+          </div>
+        </section>
+        <section class="right-column">
+          <div class="metrics-grid">
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+            <div class="card metric-card skeleton-pulse" style="height: 100px;"></div>
+          </div>
+          <div class="card forecast-hourly-card skeleton-pulse" style="height: 220px;"></div>
+          <div class="card forecast-daily-card skeleton-pulse" style="height: 300px;"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+      <p>Data provided by Open-Meteo API. Designed with precision by AtmosphereX.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

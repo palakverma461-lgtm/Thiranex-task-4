@@ -1,0 +1,13 @@
+# ====================================================================
+# AtmosphereX - Requirements
+# ====================================================================
+# 
+# This is a static frontend project (HTML, CSS, and vanilla JS).
+# No external Python backend packages or libraries are required to run it.
+# 
+# To launch the local web server, run the built-in HTTP server:
+#     python -m http.server 8080
+# 
+# If you plan to extend this with a Python backend later, you can 
+# add your library requirements (e.g. Flask, FastAPI, requests) here.
+#
